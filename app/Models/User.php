@@ -23,14 +23,14 @@ class User extends Authenticatable
             'password',
             'bio',
             'is_private',
-            
+
     ];
 
-    public function post(){
+    public function posts   (){
         return $this->hasMany(Post::class);
     }
 
-    
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -42,7 +42,7 @@ class User extends Authenticatable
         'remember_token'
     ];
 
-    
+
 
     public $timestamps = false;
 

@@ -30,9 +30,9 @@ Route::prefix('v1')->group(function(){
         Route::post('auth/logout',[AuthController::class,'logout']);
 
 
-        Route::post('post', [PostController::class,'createPost']);
-        Route::delete('post/{postId}',[PostController::class,'deletepost']);
-        Route::get('post',[PostController::class,'getPost']);
+        Route::post('posts', [PostController::class,'createPost']);
+        Route::delete('posts/{postId}',[PostController::class,'deletepost']);
+        Route::get('posts',[PostController::class,'getPost']);
 
 
         Route::post('users/{username}/follow',[FollowController::class,'followUser']);
@@ -48,5 +48,5 @@ Route::prefix('v1')->group(function(){
     });
 
 
-    
+
 });

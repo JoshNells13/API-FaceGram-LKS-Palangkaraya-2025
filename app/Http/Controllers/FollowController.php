@@ -9,10 +9,13 @@ use Illuminate\Http\Request;
 
 class FollowController extends Controller
 {
-      public function followUser(Request $request,$username){
+    public function followUser(Request $request, $username)
+    {
         $follow = User::where('username', $username)->first();
         if (!$follow) return response(['message', 'User not found'], 404);
-        if ($follow->id == $request->user()->id) return response(['message', 'You are not allowed to follow yourself'], 422);
+        if ($follow->id == $request->user()->id) return response([
+            'message' => 'You Are Not Allowed to follow your self'
+        ], 422);
 
         $checkFollow = Follow::where(['follower_id' => $request->user()->id, 'following_id' => $follow->id])->first();
         if ($checkFollow) return response([
@@ -32,33 +35,45 @@ class FollowController extends Controller
         ], 200);
     }
 
-    public function unfollowUser(Request $request,$username){
+    public function unfollowUser(Request $request, $username)
+    {
         $follow = User::where('username', $username)->first();
         if (!$follow) return response(['message', 'User not found'], 404);
 
-        $checkFollow = Follow::where(['follower_id'=> $request->user()->id, 'following_id' => $follow->id])->first();
+        $checkFollow = Follow::where(['follower_id' => $request->user()->id, 'following_id' => $follow->id])->first();
         if (!$checkFollow) return response(['message', 'You are not following this user'], 422);
 
         $checkFollow->delete();
 
-    return response(['message', 'Unfollow success'], 200);
+        return response(['message', 'Unfollow success'], 200);
     }
 
-    public function getFollowing(Request $request){
-        $following = Follow::where('follower_id', $request->user()->id)->get()->pluck('following');
+    public function getFollowing(Request $request, $username)
+    {
 
-        return response([
-            'following' => $following
-        ],200);
-    }
+        $CheckFollowingUser = User::where('username',$username)->first();
 
-    public function getFollower(Request $request, $username){
-        $user = User::where('username', $username)->first();
-
-        if(!$user){
+        if(!$CheckFollowingUser){
             return response([
                 'message' => 'user not found'
             ],404);
+        }
+
+        $following = Follow::where('follower_id', $CheckFollowingUser->id)->get()->pluck('following');
+
+        return response([
+            'following' => $following
+        ], 200);
+    }
+
+    public function getFollower(Request $request, $username)
+    {
+        $user = User::where('username', $username)->first();
+
+        if (!$user) {
+            return response([
+                'message' => 'user not found'
+            ], 404);
         }
 
         $follower = Follow::where('following_id', $user->id)->get()->load('follower');
