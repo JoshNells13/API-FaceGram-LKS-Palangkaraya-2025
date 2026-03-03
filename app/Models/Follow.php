@@ -17,7 +17,7 @@ class Follow extends Model
 
     public function follower(){
         return $this->belongsTo(User::class,'follower_id');
-    }   
+    }
 
     public $timestamps = false;
 

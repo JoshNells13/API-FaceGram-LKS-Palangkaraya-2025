@@ -29,12 +29,21 @@ class UserController extends Controller
             ->first();
         if (!$user) return response(['message' => 'User not found'], 404);
 
-        $following = Follow::where(['following_id' => $user->id, 'follower_id' => $request->user()->id])->first();
-        $follower = Follow::where(['following_id' => $request->user()->id, 'follower_id' => $user->id])->first();
+        $following = Follow::where([
+            'follower_id' => auth()->id(),
+            'following_id' => $user->id
+        ])->first();
 
-        if (!$user->is_private ||  $user->id == $request->user()->id || ($user->is_private && $following != null && $following->is_accepted == true)) {
-            $posts = $user->posts;
+        $follower = Follow::where([
+            'follower_id' => $user->id,
+            'following_id' => auth()->id()
+        ])->first();
 
+        $isOwner = $user->id === auth()->id();
+        $isPublic = !$user->is_private;
+        $isApprovedFollower = $following?->is_accepted == 1;
+
+        if ($isPublic || $isOwner || $isApprovedFollower) {
             return response([
                 'id' => $user->id,
                 'full_name' => $user->full_name,
@@ -42,13 +51,17 @@ class UserController extends Controller
                 'bio' => $user->bio,
                 'is_private' => $user->is_private,
                 'created_at' => $user->created_at,
-                'is_your_account' => $user->id == $request->user()->id,
-                'following_status' => !$following ? 'not-following' : ($following->is_accepted ? 'following' : 'requested'),
-                'follower_status' => !$follower ? 'not-follower' : ($follower->is_accepted ? 'follower' : 'requested'),
-                'post_count' => $user->posts->count(),
-                'followers_count' => $user->followings->count(),
-                'following_count' => $user->followers->count(),
-                'posts' => $posts,
+                'is_your_account' => $isOwner,
+                'following_status' => !$following
+                    ? 'not-following'
+                    : ($following->is_accepted ? 'following' : 'requested'),
+                'follower_status' => !$follower
+                    ? 'not-follower'
+                    : ($follower->is_accepted ? 'follower' : 'requested'),
+                'post_count' => $user->posts_count,
+                'followers_count' => $user->followers_count,
+                'following_count' => $user->followings_count,
+                'posts' => $user->posts,
             ], 200);
         }
 
@@ -62,9 +75,9 @@ class UserController extends Controller
             'is_your_account' => $user->id == $request->user()->id,
             'following_status' => !$following ? 'not-following' : ($following->is_accepted ? 'following' : 'requested'),
             'follower_status' => !$follower ? 'not-follower' : ($follower->is_accepted ? 'follower' : 'requested'),
-            'post_count' => $user->posts,
-            'followers_count' => $user->followings,
-            'following_count' => $user->followers,
+            'post_count' => $user->posts_count,
+            'followers_count' => $user->followers_count,
+            'following_count' => $user->followings_count,
         ], 200);
     }
 }

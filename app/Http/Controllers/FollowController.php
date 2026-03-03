@@ -45,7 +45,7 @@ class FollowController extends Controller
 
         $checkFollow->delete();
 
-        return response(['message', 'Unfollow success'], 200);
+        return response(['message' => "Unfollow {$follow->username} success"], 200);
     }
 
     public function getFollowing(Request $request, $username)
